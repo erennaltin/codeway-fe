@@ -1,0 +1,7 @@
+export { default as TextLarge } from './TextLarge.vue'
+export { default as TextLargeStrong } from './TextLargeStrong.vue'
+export { default as TextXLarge } from './TextXLarge.vue'
+export { default as TextXLargeStrong } from './TextXLargeStrong.vue'
+export { default as Text2XLarge } from './Text2XLarge.vue'
+export { default as Text2XLargeStrong } from './Text2XLargeStrong.vue'
+export { default as TextRegular } from './TextRegular.vue'
