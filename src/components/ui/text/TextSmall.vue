@@ -1,5 +1,5 @@
 <template>
-    <p :class="cn('text-lg font-bold text-[#C8C7CB] dark',props.class)">
+    <p :class="cn('text-sm text-[#C8C7CB] dark ',props.class)">
         <slot />
     </p>
 </template>
@@ -14,5 +14,4 @@ const props=defineProps({
         default: ''
     }
 })
-
 </script>

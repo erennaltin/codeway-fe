@@ -1,3 +1,36 @@
+<template>
+    <!-- HEADER ROW -->
+    <div class="grid grid-cols-4" :style="`grid-template-columns: ${gridTemplateColumns}`">
+        <div v-for="(column,index) in columns" :key="column.key">
+            <Text2XLarge class="!text-[#778BA4] ">
+                {{column.label}}
+            </Text2XLarge>
+        </div>
+    </div>
+    <!-- DATA ROWS -->
+    <div v-for="(row,index) in data" :key="index" class="grid grid-cols-4 py-2"
+        :style="`grid-template-columns: ${gridTemplateColumns}`">
+
+        <TextRegular>
+            {{row.parameterKey}}
+        </TextRegular>
+        <TextRegular>
+            {{row.value}}
+        </TextRegular>
+        <TextRegular>
+            {{row.description}}
+        </TextRegular>
+        <TextRegular>
+            {{row.createDate}}
+        </TextRegular>
+        <div class="flex gap-4">
+            <Button class="edit-button">Edit</Button>
+            <Button class="delete-button">Delete</Button>
+        </div>
+
+    </div>
+</template>
+
 <script lang="ts" setup>
 import {Text2XLarge,TextRegular} from '@/components/ui/text'
 import {Button} from '@/components/ui/button'
@@ -56,39 +89,6 @@ const data=[{
 
 const gridTemplateColumns=columns.map(column => column.width).join(' ')
 </script>
-
-<template>
-    <!-- HEADER ROW -->
-    <div class="grid grid-cols-4" :style="`grid-template-columns: ${gridTemplateColumns}`">
-        <div v-for="(column,index) in columns" :key="column.key">
-            <Text2XLarge class="!text-[#778BA4] ">
-                {{column.label}}
-            </Text2XLarge>
-        </div>
-    </div>
-    <!-- DATA ROWS -->
-    <div v-for="(row,index) in data" :key="index" class="grid grid-cols-4 py-2"
-        :style="`grid-template-columns: ${gridTemplateColumns}`">
-
-        <TextRegular>
-            {{row.parameterKey}}
-        </TextRegular>
-        <TextRegular>
-            {{row.value}}
-        </TextRegular>
-        <TextRegular>
-            {{row.description}}
-        </TextRegular>
-        <TextRegular>
-            {{row.createDate}}
-        </TextRegular>
-        <div class="flex gap-4">
-            <Button class="edit-button">Edit</Button>
-            <Button class="delete-button">Delete</Button>
-        </div>
-
-    </div>
-</template>
 
 <style lang="scss" scoped>
 .edit-button {

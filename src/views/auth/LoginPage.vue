@@ -1,94 +1,63 @@
-<script setup lang="ts"></script>
-
 <template>
-  <div class="login-container">
-    <img src="/images/logo.png" alt="logo" class="logo" />
-    <p class="login-text">Please sign in</p>
-    <form @submit.prevent="" class="login-form">
-      <div class="inputs">
-        <input type="text" placeholder="E-mail address" />
-        <input type="password" placeholder="Password" />
-      </div>
-
-      <button class="primary-button" type="submit">Sign in</button>
+  <div class="flex flex-col mt-24 items-center">
+    <img src="/images/logo.png" alt="logo" class="w-[270px] mb-8" />
+    <Text2XLarge class="!text-[#32335c]">Please sign in</Text2XLarge>
+    <form @submit="onSubmit" class="mt-4 w-[300px] mb-12">
+      <FormField v-slot="{componentField}" name="email">
+        <FormItem>
+          <FormControl>
+            <Input type="email" placeholder="E-mail address" v-bind="componentField" class="rounded-b-none" />
+          </FormControl>
+        </FormItem>
+      </FormField>
+      <FormField v-slot="{componentField}" name="password">
+        <FormItem>
+          <FormControl>
+            <Input type="password" placeholder="Password" v-bind="componentField" class="rounded-t-none" />
+          </FormControl>
+        </FormItem>
+      </FormField>
+      <Button type="submit"
+        class="bg-gradient-to-tr !from-[#374dbb] !to-[#5f7afb] text-white w-full py-6 rounded-md mt-2">
+        Sign in
+      </Button>
     </form>
-    <p class="copyright-text">Codeway © 2021</p>
+    <TextSmall class="!text-[#6c757d]">Codeway © 2021</TextSmall>
   </div>
 </template>
 
-<style scoped lang="scss">
-.login-container {
-  display: flex;
-  flex-direction: column;
-  margin-top: 200px;
-  align-items: center;
 
-  .logo {
-    width: 270px;
-    margin-bottom: 32px;
-  }
+<script setup lang="ts">
+import {toTypedSchema} from '@vee-validate/zod'
+import {useForm} from 'vee-validate';
+import * as z from 'zod'
 
-  .login-text {
-    color: #32335c;
-    font-size: 2rem;
-  }
+import {Text2XLarge} from '@/components/ui/text';
+import TextSmall from '@/components/ui/text/TextSmall.vue';
+import {FormField,FormItem,FormLabel,FormControl,FormDescription,FormMessage} from '@/components/ui/form';
+import {Button} from '@/components/ui/button';
+import {Input} from '@/components/ui/input';
+import {AuthService} from '@/services/authService';
 
-  .login-form {
-    display: flex;
-    flex-direction: column;
-    margin-top: 32px;
+const formSchema=toTypedSchema(z.object({
+  email: z.string(),
+  password: z.string(),
+}))
 
-    .inputs {
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 16px;
+const form=useForm({
+  validationSchema: formSchema,
+})
 
-      input {
-        padding: 0;
-        border: none;
-        width: 300px;
-        border: 2px solid #2b3553;
-        border-bottom: 1px solid #2b3553;
-        border-top: 1px solid #2b3553;
-        padding: 8px;
-        background-color: transparent;
-        &:focus-visible {
-          outline: none;
-        }
-        &:focus {
-          border: 2px solid #df4ec8;
-        }
-      }
-
-      input:first-of-type {
-        border-top-left-radius: 8px;
-        border-top-right-radius: 8px;
-        border-top-width: 2px;
-      }
-
-      input:last-of-type {
-        border-bottom-left-radius: 8px;
-        border-bottom-right-radius: 8px;
-
-        border-bottom-width: 2px;
-      }
-    }
-  }
-}
-
-.primary-button {
-  background: rgb(55, 77, 187);
-  background: linear-gradient(45deg, rgba(55, 77, 187, 1) 0%, rgba(95, 122, 251, 1) 100%);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 8px 16px;
-  font-weight: 600;
-}
-
-.copyright-text {
-  color: #6c757d;
-  font-size: 0.8rem;
-  margin-top: 48px;
-}
-</style>
+const onSubmit=form.handleSubmit((values) => {
+  console.log('Form submitted:',values);
+  AuthService.loginUser(values)
+    .then((response) => {
+      console.log('Login successful:',response);
+      // Handle successful login (e.g., redirect to dashboard)
+    })
+    .catch((error) => {
+      console.error('Login failed:',error);
+      // Handle login error (e.g., show error message)
+    });
+})
+</script>

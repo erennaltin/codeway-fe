@@ -1,17 +1,3 @@
-<script setup lang="ts">
-import {LucideChevronDown,LucideUser} from 'lucide-vue-next';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from './ui/dropdown-menu';
-
-
-</script>
 <template>
   <div class="px-8 py-4 flex justify-between">
     <img src="/images/logo.png" alt="logo" class="h-8" />
@@ -33,4 +19,18 @@ import {
   </div>
 </template>
 
-<style scoped lang="scss"></style>
+
+<script setup lang="ts">
+import {LucideChevronDown,LucideUser} from 'lucide-vue-next';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from './ui/dropdown-menu';
+
+
+</script>
