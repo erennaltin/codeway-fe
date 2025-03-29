@@ -1,9 +1,11 @@
+import { AuthService } from '@/services/AuthService'
 import axios from 'axios'
 
 const setDefaultAxios = () => {
   axios.defaults.headers.get['Pragma'] = 'no-cache'
   axios.defaults.baseURL = import.meta.env.VITE_API_URL
   axios.defaults.withCredentials = true
+  setAuthorizeInterceptor()
 }
 
 const setAuthorizeInterceptor = () => {
@@ -12,11 +14,9 @@ const setAuthorizeInterceptor = () => {
       return response
     },
     async function (error) {
-      if (error?.response?.data?.error === 'INVALID_TOKEN') {
-        return Promise.reject(error)
+      if (error.status === 401) {
+        AuthService.logoutUser()
       }
-
-      return Promise.reject(error)
     }
   )
 }

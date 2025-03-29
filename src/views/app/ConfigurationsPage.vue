@@ -148,6 +148,9 @@ const {mutate,isPending}=useMutation({
     onSuccess: () => {
         // Invalidate and refetch
         queryClient.invalidateQueries({queryKey: ['configurations']})
+
+        // Reset the form
+        form.resetForm();
     },
 })
 
