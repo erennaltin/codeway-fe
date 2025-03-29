@@ -1,4 +1,6 @@
-import { getAuth, signInWithEmailAndPassword, type Auth, type UserCredential } from 'firebase/auth'
+import type { LoginDTO } from '@/data/dto/Login/LoginDTO'
+import { setAxiosAuthorizationToken } from '@/lib/axios'
+import { getAuth, signInWithEmailAndPassword, type Auth, type User, type UserCredential } from 'firebase/auth'
 
 export class AuthService {
   private static instance: AuthService
@@ -10,20 +12,39 @@ export class AuthService {
 
   public static getInstance(): AuthService {
     if (!AuthService.instance) {
-      console.log('Creating AuthService instance')
       AuthService.instance = new AuthService()
     }
     return AuthService.instance
   }
 
-  public static async loginUser({ email, password }: { email: string; password: string }): Promise<UserCredential> {
+  public static async loginUser({ email, password }: LoginDTO): Promise<UserCredential> {
+    const auth = AuthService.getInstance().auth
+
+    return new Promise((resolve, reject) => {
+      signInWithEmailAndPassword(auth, email, password)
+        .then(async (userCredential: UserCredential) => {
+          resolve(userCredential)
+        })
+        .catch(error => {
+          reject(error)
+        })
+    })
+  }
+
+  public static getAuth(): Auth {
+    return AuthService.getInstance().auth
+  }
+
+  public static getCurrentUser(): User | null {
+    const auth = AuthService.getInstance().auth
+    return auth.currentUser
+  }
+
+  public static async logoutUser(): Promise<void> {
     const auth = AuthService.getInstance().auth
     try {
-      const response: UserCredential = await signInWithEmailAndPassword(auth, email, password)
-      console.log('FILTERED RESPONSE', response)
-      console.log('User logged in successfully')
+      await auth.signOut()
     } catch (error) {
-      console.error('Error logging in user:', error)
       throw error
     }
   }

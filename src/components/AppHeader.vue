@@ -3,14 +3,14 @@
     <img src="/images/logo.png" alt="logo" class="h-8" />
     <DropdownMenu>
       <DropdownMenuTrigger>
-        <div class="flex items-center ">
+        <div class="flex items-center">
           <LucideUser class="text-white" />
           <LucideChevronDown class="text-white" />
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuGroup>
-          <DropdownMenuItem>
+          <DropdownMenuItem @click="handleSignOut">
             <span>Sign out</span>
           </DropdownMenuItem>
         </DropdownMenuGroup>
@@ -19,9 +19,8 @@
   </div>
 </template>
 
-
 <script setup lang="ts">
-import {LucideChevronDown,LucideUser} from 'lucide-vue-next';
+import {LucideChevronDown,LucideUser} from "lucide-vue-next";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,8 +28,11 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from './ui/dropdown-menu';
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import {AuthService} from "@/services/AuthService";
 
-
+const handleSignOut=() => {
+  AuthService.logoutUser();
+};
 </script>
