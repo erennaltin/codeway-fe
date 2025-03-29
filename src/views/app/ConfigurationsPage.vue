@@ -1,69 +1,47 @@
 <template>
-    <!-- HEADER ROW -->
-    <div class="grid grid-cols-4 gap-2" :style="`grid-template-columns: ${gridTemplateColumns}`">
-        <div v-for="(column,index) in columns" :key="column.key">
-            <Text2XLarge class="!text-[#778BA4] ">
-                {{column.label}}
-            </Text2XLarge>
-        </div>
+    <div v-if="isDataPending">
+        <Loader2 class="w-4 h-4 mr-2 animate-spin" />
+
     </div>
-    <!-- DATA ROWS -->
-    <div v-for="(row,index) in data" :key="index" class="grid grid-cols-4 py-2 gap-2"
-        :style="`grid-template-columns: ${gridTemplateColumns}`">
+    <div v-else>
+        <DataTable :columns="columns" :data="formattedData" :isDataPending="isDataPending"
+            :onEdit="handleEditButtonClicked" :onDelete="handleDeleteButtonClicked" :is-mobile="isMobile" />
+        <!-- INPUT ROW -->
+        <form @submit="onSubmit" class="grid grid-cols-5 py-2 gap-2"
+            :style="`grid-template-columns: ${gridTemplateColumns}`">
+            <FormField v-slot="{componentField}" name="parameterKey">
+                <FormItem>
+                    <FormControl>
+                        <Input type="text" placeholder="New parameter" v-bind="componentField" />
+                    </FormControl>
+                </FormItem>
+            </FormField>
+            <FormField v-slot="{componentField}" name="value">
+                <FormItem>
+                    <FormControl>
+                        <Input type="text" placeholder="Value" v-bind="componentField" />
+                    </FormControl>
+                </FormItem>
+            </FormField>
+            <FormField v-slot="{componentField}" name="description">
+                <FormItem class="col-start-3 col-end-5">
+                    <FormControl>
+                        <Input type="text" placeholder="Description" v-bind="componentField" />
+                    </FormControl>
+                </FormItem>
+            </FormField>
+            <div>
+                <Button type="submit" :disabled="isCreatePending"
+                    class="bg-gradient-to-tr !from-[#374dbb] !to-[#5f7afb] text-white rounded-md w-fit">
+                    <Loader2 class="w-4 h-4 mr-2 animate-spin" v-if="isCreatePending" />
+                    <span v-if="!isCreatePending">ADD</span>
+                    <span v-if="isCreatePending">Creating...</span>
+                </Button>
+            </div>
 
-        <TextRegular>
-            {{row.parameterKey}}
-        </TextRegular>
-        <TextRegular>
-            {{row.value}}
-        </TextRegular>
-        <TextRegular>
-            {{row.description}}
-        </TextRegular>
-        <TextRegular>
-            {{dayjs(row.createdAt).format('DD/MM/YYYY HH:mm')}}
 
-        </TextRegular>
-        <div class="flex gap-4">
-            <Button class="bg-gradient-to-tr !from-[#335ef5] !to-[#1e89f8] text-white rounded-md w-fit">Edit</Button>
-            <Button class="bg-gradient-to-tr !from-[#ee2b20] !to-[#fb588b] text-white rounded-md w-fit">Delete</Button>
-        </div>
+        </form>
     </div>
-    <!-- INPUT ROW -->
-    <form @submit="onSubmit" class="grid grid-cols-4 py-2 gap-2"
-        :style="`grid-template-columns: ${gridTemplateColumns}`">
-        <FormField v-slot="{componentField}" name="parameterKey">
-            <FormItem>
-                <FormControl>
-                    <Input type="text" placeholder="New parameter" v-bind="componentField" />
-                </FormControl>
-            </FormItem>
-        </FormField>
-        <FormField v-slot="{componentField}" name="value">
-            <FormItem>
-                <FormControl>
-                    <Input type="text" placeholder="Value" v-bind="componentField" />
-                </FormControl>
-            </FormItem>
-        </FormField>
-        <FormField v-slot="{componentField}" name="description">
-            <FormItem class="col-start-3 col-end-5">
-                <FormControl>
-                    <Input type="text" placeholder="Description" v-bind="componentField" />
-                </FormControl>
-            </FormItem>
-        </FormField>
-        <div>
-            <Button type="submit" :disabled="isPending"
-                class="bg-gradient-to-tr !from-[#374dbb] !to-[#5f7afb] text-white rounded-md w-fit">
-                <Loader2 class="w-4 h-4 mr-2 animate-spin" v-if="isPending" />
-                <span v-if="!isPending">ADD</span>
-                <span v-if="isPending">Creating...</span>
-            </Button>
-        </div>
-
-
-    </form>
 </template>
 
 <script lang="ts" setup>
@@ -73,33 +51,39 @@ import {useMutation,useQuery,useQueryClient} from '@tanstack/vue-query'
 import {useForm} from "vee-validate";
 import {toTypedSchema} from "@vee-validate/zod";
 import * as z from "zod";
-import dayjs from 'dayjs';
+import {router} from '@/router'
 
 // API
-import {createConfiguration,getAllConfigurations} from '@/api/configuration'
+import {createConfiguration,deleteConfiguration,getAllConfigurations} from '@/api/configuration'
 import type {ConfigurationCreateDTO} from '@/data/dto/Configuration/ConfigurationCreateDTO';
+import DataTable from '@/components/DataTable.vue';
+import type {DataTableColumn} from '@/data/components/DataTable';
+import {computed} from 'vue';
+import dayjs from 'dayjs';
+import type {ConfigurationDTO} from '@/data/dto/Configuration/ConfigurationDTO';
 
 // Components
-import {Text2XLarge,TextRegular} from '@/components/ui/text'
 import {Button} from '@/components/ui/button'
 import {FormField,FormItem,FormControl} from "@/components/ui/form";
 import {Input} from "@/components/ui/input";
 import {Loader2} from 'lucide-vue-next';
+
+
 // #endregion
 
 // #region Constants
-const columns=[
+const columns: DataTableColumn[]=[
     {
         key: 'parameterKey',
         label: 'Parameter Key',
         sortable: false,
-        width: '20%',
+        width: '25%',
     },
     {
         key: 'value',
         label: 'Value',
         sortable: false,
-        width: '20%',
+        width: '10%',
     },
     {
         key: 'description',
@@ -111,27 +95,40 @@ const columns=[
         key: 'createDate',
         label: 'Create Date',
         sortable: true,
-        width: '20%',
+        width: '15%',
     },
     {
         key: 'actions',
         label: '',
         sortable: false,
-        width: '10%',
+        width: '20%',
     },
 ]
 
 // #endregion
 
+defineProps({
+    isMobile: {
+        type: Boolean,
+        default: false,
+    },
+})
+
 const queryClient=useQueryClient()
 
 // Configuration Data
-const {data}=useQuery({
+const {data,isPending: isDataPending}=useQuery<ConfigurationDTO[]>({
     queryKey: ['configurations'],
     queryFn: getAllConfigurations,
 })
 
-const gridTemplateColumns=columns.map(column => column.width).join(' ')
+const formattedData=computed(() => {
+    return data.value?.map((item: ConfigurationDTO) => ({
+        ...item,
+        createDate: dayjs(item.createdAt).format('MM/DD/YYYY HH:mm'),
+    }))
+})
+
 
 
 // Creating a new Configuration
@@ -143,7 +140,7 @@ const formSchema=toTypedSchema(
     })
 );
 
-const {mutate,isPending}=useMutation({
+const {mutate: createMutate,isPending: isCreatePending}=useMutation({
     mutationFn: createConfiguration,
     onSuccess: () => {
         // Invalidate and refetch
@@ -159,6 +156,34 @@ const form=useForm({
 });
 
 const onSubmit=form.handleSubmit(async (values: ConfigurationCreateDTO) => {
-    mutate(values)
+    createMutate(values)
 });
+
+// Updating the Configuration
+const handleEditButtonClicked=(row: ConfigurationDTO) => {
+    router.push({
+        name: 'ConfigurationEdit',
+        params: {id: row.id},
+    });
+}
+
+// Deleting the Configuration
+const {mutate: deleteMutate,isPending: isDeletePending}=useMutation({
+    mutationFn: deleteConfiguration,
+    onSuccess: () => {
+        // Invalidate and refetch
+        queryClient.invalidateQueries({queryKey: ['configurations']})
+
+        // Reset the form
+        form.resetForm();
+    },
+})
+const handleDeleteButtonClicked=(id: string) => {
+    // Call the delete API
+    deleteMutate(id)
+    // After successful deletion, invalidate the query to refetch the data
+    queryClient.invalidateQueries({queryKey: ['configurations']})
+}
+
+const gridTemplateColumns=columns.map(column => column.width).join(' ')
 </script>

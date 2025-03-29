@@ -13,6 +13,8 @@ const LoginPage = () => import('@/views/auth/LoginPage.vue')
 
 // App
 const AppInner = () => import('@/views/app/AppInner.vue')
+const Configurations = () => import('@/views/app/ConfigurationsPage.vue')
+const ConfigurationEdit = () => import('@/views/app/ConfigurationEditPage.vue')
 
 // Routes
 const authRoutes = [
@@ -23,7 +25,26 @@ const authRoutes = [
   }
 ]
 
-const appRoutes = [{ path: '/admin', name: 'AppInner', component: AppInner }]
+const appRoutes = [
+  {
+    path: '/admin',
+    name: 'AppInner',
+    component: AppInner,
+    children: [
+      {
+        path: '',
+        name: 'Configurations',
+        component: Configurations
+      },
+      {
+        path: ':id',
+        name: 'ConfigurationEdit',
+        component: ConfigurationEdit,
+        props: true
+      }
+    ]
+  }
+]
 
 const routes = [
   { path: '/:pathMatch(.*)*', name: 'SplashPage', component: SplashPage },
@@ -103,9 +124,11 @@ auth.authStateReady().then(async () => {
 })
 
 // Listen for authentication state changes
-onAuthStateChanged(AuthService.getAuth(), user => {
+onAuthStateChanged(AuthService.getAuth(), async user => {
   if (user) {
     updateRoutes(true)
+    const accessToken = await user.getIdToken()
+    setAxiosAuthorizationToken(accessToken, user.uid)
   } else {
     updateRoutes(false)
   }

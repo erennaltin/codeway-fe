@@ -17,6 +17,7 @@ const setAuthorizeInterceptor = () => {
       if (error.status === 401) {
         AuthService.logoutUser()
       }
+      return Promise.reject(error)
     }
   )
 }
